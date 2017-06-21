@@ -1,0 +1,121 @@
+<!DOCTYPE HTML>
+<html>
+    <head>
+    <meta name="viewport" content="initial-scale=1.0, user-scalable=no">
+    <meta charset="utf-8">
+    <title>Simple markers</title>
+    <style>
+      /* Always set the map height explicitly to define the size of the div
+       * element that contains the map. */
+      #map {
+        height: 50%;
+      }
+      /* Optional: Makes the sample page fill the window. */
+      html, body {
+        height: 100%;
+        margin: 0;
+        padding: 0;
+      }
+    </style>
+  </head>
+<body>
+    <span id="uptime"></span><br>
+    <span id="tstamp"></span>
+    
+    <div id="map"></div>
+
+    <br><br>
+    <button onclick="start()">Connect</button>
+    <button onclick="placeMarker()" >Map</button> 
+
+    <script type="text/javascript">
+        var lat;
+        var long;
+    function start() {
+
+        document.getElementById("uptime").innerHTML = "Waiting for data...";
+        var deviceID = "2c004b001751353338363036";
+        var accessToken = "68c164f729c13122277d216c4dd273d1423005d9";
+        var eventSource = new EventSource("https://api.spark.io/v1/devices/" + deviceID + "/events/?access_token=" + accessToken);
+
+        eventSource.addEventListener('open', function(e) {
+            console.log("Opened!"); },false);
+
+        eventSource.addEventListener('error', function(e) {
+            console.log("Errored!"); },false);
+
+        eventSource.addEventListener('Uptime', function(e) {
+            var rawData = JSON.parse(e.data);
+            var parsedData = JSON.parse(rawData.data);
+            var tempSpan = document.getElementById("uptime");
+            var tsSpan   = document.getElementById("tstamp");
+            tempSpan.innerHTML = "Core: " + rawData.coreid + " JSON Data: " + parsedData.Latitude + "," + parsedData.Longitude;
+        
+            tempSpan.style.fontSize = "28px";
+            tsSpan.innerHTML = "At timestamp " + rawData.published_at;
+            tsSpan.style.fontSize = "9px";
+        }, false);   
+    }   
+    </script>
+    
+    <script type="text/javascript">
+        
+        var lat;
+        var long;
+        var markersArray = [];
+        var map;
+         function initMap() {
+        var myLatlng = new google.maps.LatLng(29.5528391, -95.0931863);  
+        var myOptions = {
+            zoom: 12,
+            center: myLatlng,
+            mapTypeId: google.maps.MapTypeId.ROADMAP
+        }
+        map = new google.maps.Map(document.getElementById("map"), myOptions);
+             
+            
+    
+    }
+        
+        function addMarker(location) {
+        marker = new google.maps.Marker({
+            position: location,
+            map: map
+        });
+            
+            markersArray.push(marker);
+            marker.setMap(map);
+    }
+        function placeMarker(){
+            var deviceID = "2c004b001751353338363036";
+        var accessToken = "68c164f729c13122277d216c4dd273d1423005d9";
+        var eventSource = new EventSource("https://api.spark.io/v1/devices/" + deviceID + "/events/?access_token=" + accessToken);
+            
+            eventSource.addEventListener('Uptime', function(e) {
+            var rawData = JSON.parse(e.data);
+            var parsedData = JSON.parse(rawData.data);
+                
+                 lat = parsedData.Latitude;
+                 long = parsedData.Longitude;
+                
+                
+                 }, false);
+            
+            
+            var centralPark = new google.maps.LatLng(lat,long);
+            addMarker(centralPark);
+        }
+    
+    
+    </script>
+    
+    
+    <script>
+    placeMarker();
+    </script>
+    
+    <script async defer
+    src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDgbmv4uM0te-uMXUXAYH-H4qMye9HgKj8&callback=initMap">
+    </script>
+</body>
+</html>
