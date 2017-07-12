@@ -26,11 +26,30 @@
 
     <br><br>
     <button onclick="start()">Connect</button>
-    <button onclick="placeMarker()" >Map</button> 
+    <button id="placeMarker" onclick="placeMarker()" >Map</button> 
 
     <script type="text/javascript">
         var lat;
         var long;
+        var currentDistance = 0;
+        var pastLat;
+        var pastLong;
+        var currentLat;
+        var currentLong;
+    
+///////////////////////////////////
+        
+        function initMap() {    //initializes map at the center of JSC campus
+            var myLatlng = new google.maps.LatLng(29.557720, -95.086797);  
+            var myOptions = {
+            zoom: 14,
+            center: myLatlng,
+            mapTypeId: google.maps.MapTypeId.ROADMAP
+            }
+            map = new google.maps.Map(document.getElementById("map"), myOptions);
+             
+            } 
+////////////////////////////////////
     function start() {
 
         document.getElementById("uptime").innerHTML = "Waiting for data...";
