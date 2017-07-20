@@ -1,6 +1,26 @@
-        var firebaseRef = firebase.database().ref(); //initializes the reference to our database
+        var firebaseRef = firebase.database().ref().child("Location"); //initializes the reference to our database
+        
+        //reference to the root/node that we want to retrieve data from
        
+        
+        var holder; 
 
+        
+      var rootRef= firebase.database().ref(); 
+
+        
+
+    
+             
+       
+     
+                          
+                          
+                          
+                          
+
+
+        
 
         var lat;
         var long;
@@ -35,6 +55,14 @@
             }
             map = new google.maps.Map(document.getElementById("map"), myOptions);
              
+             
+             var heatmap = new google.maps.visualization.HeatmapLayer({
+                data: [],
+                map: map,
+                radius: 16
+                });
+
+             
             }
         
         ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -42,46 +70,30 @@
         
         
         function addMarker(location) {
-       var marker = new google.maps.Marker({
+            var marker = new google.maps.Marker({
             position: location,
             map: map
-        });
+            });
             
             markersArray.push(marker);
             marker.setMap(map);
             
-          
         }
         
-        function getDistance(start,end){
-            
-            var service = new google.maps.DistanceMatrixService;
-            
-            service.getDistanceMatrix({
-                    origins: [start],
-                    destinations: [end],
-                    travelMode: 'WALKING',
-                    unitSystem: google.maps.UnitSystem.METRIC,
-                    avoidHighways: false,
-                    avoidTolls: false
-                    }, function(response, status) {
-                        if (status !== 'OK') {
-                        alert('Error was: ' + status);
-                        } else {
-                        var distance = response.rows[0].elements[0].distance;
-                        var distance_value = distance.value;
-                        currentDistance += distance.text;  //adds to total distance traveled
-                            alert("Boi");
-           
-
-            
-
-          }
-        });
-            
+        function testMarker(location){
+            var marker = new google.maps.Marker({
+            map: map,
+            animation: google.maps.Animation.BOUNCE,
+            position: location
+            });
+            marker.setMap(map);
         }
+
         
         
+        
+        var index = 0;
+        var pastLocations = []; //holds all the past locations of asset
         
         function placeMarker(){
             
@@ -96,8 +108,10 @@
                 
                  currentLat = parsedData.Latitude;
                  currentLong = parsedData.Longitude;
-                firebaseRef.push().set(currentLat + "," + currentLong);
                 
+                
+            
+               
                    
                 
                 
@@ -153,6 +167,25 @@
                  }, false);
             
             
+            
+            
+            
+                index++;
+                firebaseRef.child("Bookmark").update({
+                    Place: index
+                });
+                firebaseRef.child(index).set({
+                    Latitude: currentLat,
+                    Longitude: currentLong
+                });
+                firebaseRef.on("child_added", snap =>{
+                    var latitu = snap.child("Latitude").val();
+                    var longitu = snap.child("Longitude").val();
+                    var dataLocate = new google.maps.LatLng(latitu,longitu);
+                    testMarker(dataLocate);
+                    
+                })
+            
             var centralPark = new google.maps.LatLng(currentLat,currentLong);
             addMarker(centralPark);
         }
@@ -161,6 +194,6 @@
         
         window.setInterval(function(){
           placeMarker();
-         }, 15000);
+         }, 5000);
         
         
