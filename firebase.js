@@ -4,6 +4,7 @@
        
         
         var holder; 
+        var pastLocations = [];
 
         
       var rootRef= firebase.database().ref(); 
@@ -56,8 +57,8 @@
             map = new google.maps.Map(document.getElementById("map"), myOptions);
              
              
-             var heatmap = new google.maps.visualization.HeatmapLayer({
-                data: [],
+            var heatmap = new google.maps.visualization.HeatmapLayer({
+                data: pastLocations,  //array of everything
                 map: map,
                 radius: 16
                 });
@@ -66,9 +67,57 @@
             }
         
         ////////////////////////////////////////////////////////////////////////////////////////////////////
+         function toggleHeatmap() {
+        heatmap.setMap(heatmap.getMap() ? null : map);
+         }
+
+        function changeGradient() {
+        var gradient = [
+          'rgba(0, 255, 255, 0)',
+          'rgba(0, 255, 255, 1)',
+          'rgba(0, 191, 255, 1)',
+          'rgba(0, 127, 255, 1)',
+          'rgba(0, 63, 255, 1)',
+          'rgba(0, 0, 255, 1)',
+          'rgba(0, 0, 223, 1)',
+          'rgba(0, 0, 191, 1)',
+          'rgba(0, 0, 159, 1)',
+          'rgba(0, 0, 127, 1)',
+          'rgba(63, 0, 91, 1)',
+          'rgba(127, 0, 63, 1)',
+          'rgba(191, 0, 31, 1)',
+          'rgba(255, 0, 0, 1)'
+        ]
+        heatmap.set('gradient', heatmap.get('gradient') ? null : gradient);
+      }
+
+        function changeRadius() {
+        heatmap.set('radius', heatmap.get('radius') ? null : 20);
+      }
+
+        
+      function changeOpacity() {
+       alert(pastLocations.length);
+          firebaseRef.on("child_added", snap =>{
+                    var latitu = snap.child("Latitude").val();
+                    var longitu = snap.child("Longitude").val();
+                    var dataLocate = new google.maps.LatLng(latitu,longitu);
+                    testMarker(dataLocate);
+                    pastLocations.push(dataLocate);
+             
+                     
+                    
+              
+              
+              
+                });
+          
+      }
         
         
-        
+
+
+
         function addMarker(location) {
             var marker = new google.maps.Marker({
             position: location,
@@ -93,7 +142,6 @@
         
         
         var index = 0;
-        var pastLocations = []; //holds all the past locations of asset
         
         function placeMarker(){
             
@@ -178,17 +226,17 @@
                     Latitude: currentLat,
                     Longitude: currentLong
                 });
-                firebaseRef.on("child_added", snap =>{
-                    var latitu = snap.child("Latitude").val();
-                    var longitu = snap.child("Longitude").val();
-                    var dataLocate = new google.maps.LatLng(latitu,longitu);
-                    testMarker(dataLocate);
-                    
-                })
+                
+                
+            
             
             var centralPark = new google.maps.LatLng(currentLat,currentLong);
             addMarker(centralPark);
         }
+
+
+
+        
         
         
         
